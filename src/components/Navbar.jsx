@@ -1,75 +1,93 @@
-import {Link } from 'react-router-dom'
-import {NavLink} from 'react-router-dom'
+import { useState, useEffect } from "react"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 
-function Navbar(){
- return(
-<header >
-    <nav className= "flex items-center  justify-between px-8 py-4 bg-slate-900 border-b-2  ">
+function Navbar() {
+  const [scrolled, setScrolled] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
 
-        <Link to="/" className="flex items-center gap-3 cursor-pointer">
-        <div className="bg-amber-500 text-slate-900 font-bold text-xl px-3 py-1">
-            LJ
-          </div>
-          <div>
-            <p className="text-white font-bold text-lg leading-tight">LJ PLANT HIRE</p>
-            <p className="text-amber-500 text-xs tracking-wide">TZANEEN · LIMPOPO</p>
-          </div>
+  // Pages with a light background need the navbar to always be solid/dark
+  const isLightPage = location.pathname !== "/"
+
+  useEffect(() => {
+    function handleScroll() {
+      setScrolled(window.scrollY > 40)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  function scrollToSection(sectionId) {
+    if (location.pathname === "/") {
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" })
+    } else {
+      navigate("/")
+      setTimeout(() => {
+        document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" })
+      }, 100)
+    }
+  }
+
+  function linkClasses(path) {
+    const isActive = location.pathname === path
+    return `
+      text-sm font-bold tracking-wide transition-colors
+      ${isActive ? "text-amber-500" : "hover:text-amber-500"}
+    `
+  }
+
+  // Force solid dark navbar on light pages, otherwise use the existing scroll behavior
+  const navBg =
+    isLightPage || scrolled
+      ? "bg-slate-900/95 backdrop-blur-md shadow-xl"
+      : "bg-white/5 backdrop-blur-sm"
+
+  const navSpacing =
+    isLightPage || scrolled
+      ? "max-w-4xl mt-4 px-6 py-0.1 rounded-full"
+      : "max-w-full mt-4 px-8 py-0.1 rounded-full"
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-50 flex justify-center transition-all duration-300 px-4  pt-0">
+      <nav
+        className={`
+          flex items-center justify-between w-full text-white
+          transition-all duration-300 ease-in-out
+          ${navBg} ${navSpacing}
+        `}
+      >
+ <Link to="/" className="flex items-center">
+  <img
+    src="/logo.png"
+    alt="LJ Plant Hire"
+    className="h-20 w-20 object-contain"
+  />
+  <span className="font-bold Tropika tracking-wide">
+    LJ PLANT HIRE
+  </span>
+</Link>
+
+        <div className="hidden md:flex items-center gap-8">
+          <Link to="/equipment" className={linkClasses("/equipment")}>
+            OUR FLEET
+          </Link>
+          <Link to="/contact" className={linkClasses("/contact")}>
+            CONTACT
+          </Link>
+          <Link to="/about" className={linkClasses("/about")}>
+            ABOUT US
+          </Link>
+        </div>
+
+        <Link
+          to="/admin"
+          className="bg-amber-500 text-slate-900 font-bold px-5 py-2 rounded text-sm hover:bg-amber-400 transition-colors"
+        >
+          ADMIN
         </Link>
-
-        <ul className="hidden md:flex gap-8 text-white text-sm font-bold tracking-wide">
-            <li  >
-                <NavLink to="/equipment"
-             
-                className={({isActive})=>
-             `cursor-pointer transition-colors duration-200 hover:text-amber-500 ${
-        isActive ? "text-amber-500" : "text-white"
-      }` }>
-                OUR FLEET
-            </NavLink></li>
-
-
-            <li><NavLink 
-            to="/process"
-            
-            className= {({isActive})=>
-
-                `cursor-pointer transition-colors duration-200 hover:text-amber-500 ${
-        isActive ? "text-amber-500" : "text-white"
-      }` }>
-            HOW TO BOOK
-            </NavLink></li>
-
-
-            <li   ><NavLink 
-            to="/contact"
-          
-            className={({isActive} ) =>
-  `cursor-pointer transition-colors duration-200 hover:text-amber-500 ${
-        isActive ? "text-amber-500" : "text-white"
-      }` }>
-                        
-                        CONTACT</NavLink></li>
-
-<li><Link to="/about" className="cursor-pointer transition-colors duration-200 hover:text-amber-500">ABOUT US</Link></li>
-       </ul>
-
-       <Link to="/admin" className="bg-amber-600 text-slate-900 font-bold text-sm px-5 py-2.5 hover:bg-amber-400 transition-colors">
-        ADMIN
-       
-       </Link>
-
-
-    </nav>
-
-
-
-
-</header>
- )
-
-
-
-
+      </nav>
+    </div>
+  )
 }
 
 export default Navbar
